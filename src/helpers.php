@@ -247,3 +247,8 @@ if (! function_exists('\Laravel\Prompts\form')) {
         return new FormBuilder();
     }
 }
+
+function steps(): StepBuilder {
+ 
+  return new StepBuilder();
+}

@@ -73,7 +73,9 @@ abstract class Prompt
     /**
      * The revert handler from the StepBuilder.
      */
-    protected static ?Closure $revertUsing = null;
+    public static ?Closure $revertUsing = null;
+
+    public static ?Closure $revertedUsing = null;
 
     /**
      * The output instance.
@@ -299,21 +301,40 @@ abstract class Prompt
             return false;
         }
 
-        if ($key === Key::CTRL_U) {
-            if (! self::$revertUsing) {
-                $this->state = 'error';
-                $this->error = 'This cannot be reverted.';
+        if($key === Key::CTRL_U) {
 
-                return true;
-            }
+             $this->state = 'error';
+             $this->error = 'Reverted.';
 
-            $this->state = 'cancel';
-            $this->cancelMessage = 'Reverted.';
-
-            call_user_func(self::$revertUsing);
+             if(self::$revertedUsing){
+                call_user_func(self::$revertedUsing);
+             }
 
             return false;
         }
+
+
+
+
+
+
+
+
+        // if ($key === Key::CTRL_U) {
+        //     if (! self::$revertUsing) {
+        //         $this->state = 'error';
+        //         $this->error = 'This cannot be reverted.';
+
+        //         return true;
+        //     }
+
+        //     $this->state = 'cancel';
+        //     $this->cancelMessage = 'Reverted.';
+
+        //     call_user_func(self::$revertUsing);
+
+        //     return false;
+        // }
 
         if ($key === Key::CTRL_C) {
             $this->state = 'cancel';

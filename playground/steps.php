@@ -1,5 +1,7 @@
 <?php
 
+use Laravel\Prompts\StepBuilder;
+
 use function Laravel\Prompts\alert;
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\error;
@@ -10,17 +12,19 @@ use function Laravel\Prompts\outro;
 use function Laravel\Prompts\password;
 use function Laravel\Prompts\select;
 use function Laravel\Prompts\spin;
+use function Laravel\Prompts\steps;
 use function Laravel\Prompts\suggest;
 use function Laravel\Prompts\text;
 use function Laravel\Prompts\warning;
 
 require __DIR__.'/../vendor/autoload.php';
 
+
  $responses = steps()
      ->add(fn () => intro("Welcome to Laravel"), revert: false)
      ->add(fn () => suggest(
     label: 'What is your name?',
-    placeholder: 'E.g. Taylor Otwell',
+    placeholder: 'E.g. Samiullah Sediqzada',
     options: [
         'Dries Vints',
         'Guus Leeuw',
@@ -45,7 +49,7 @@ require __DIR__.'/../vendor/autoload.php';
         $value[0] !== '.' => 'Please enter a relative path',
         default => null,
     },
-    ))
+    ), key: "path")
     ->add(fn () => password(
     label: 'Provide a password',
     validate: fn ($value) => match (true) {
@@ -82,17 +86,17 @@ require __DIR__.'/../vendor/autoload.php';
     );
 
     if ($install) {
-        spin(fn () => sleep(3), 'Installing dependencies...');
+        spin(fn () => sleep(2), 'Installing dependencies...');
     }
     }, revert: function () {
-        spin(fn () => sleep(3), 'Uninstall dependencies...');
+        spin(fn () => sleep(2), 'Uninstall dependencies...');
     })
     ->add(fn ($responses) => note(<<<EOT
     Installation complete!
 
     To get started, run:
 
-        cd {$responses[2]}
+        cd {$responses['path']}
         php artisan serve
     EOT))
     ->run();
