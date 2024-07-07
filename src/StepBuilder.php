@@ -26,19 +26,28 @@ class StepBuilder {
 
             $index = 0;
 
-            while($index < count($this->steps)){
+            $steps = [];
+            $previousRevert = false;
+
+            foreach($this->steps as [$step, $revert, $key]){
+                $steps[] = [$step, $previousRevert, $key];
+                $previousRevert = $revert;
+            }
+
+            while($index < count($steps)){
                  
-                [$step, $revert, $key] = $this->steps[$index];
+                [$step, $revert, $key] = $steps[$index];
 
                 $wasReverted = false;
 
-                Prompt::$revertedUsing = function () use (&$wasReverted) {
+                Prompt::$revertedUsing = $revert ? function () use (&$wasReverted) {
                       $wasReverted = true;
-                };
+                } : null;
 
                 $this->responses[$key ?? $index] = $step($this->responses);
                  
                 if($wasReverted){
+                    $revert($this->responses);
                     $index--;
                 }
                 else {

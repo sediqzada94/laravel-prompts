@@ -306,9 +306,12 @@ abstract class Prompt
              $this->state = 'error';
              $this->error = 'Reverted.';
 
-             if(self::$revertedUsing){
-                call_user_func(self::$revertedUsing);
+             if(! self::$revertedUsing){
+                $this->error = "This step cannot be reverted!";
+                return true;
              }
+
+             call_user_func(self::$revertedUsing);
 
             return false;
         }

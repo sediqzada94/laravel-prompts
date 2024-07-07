@@ -88,9 +88,12 @@ require __DIR__.'/../vendor/autoload.php';
     if ($install) {
         spin(fn () => sleep(2), 'Installing dependencies...');
     }
-    }, revert: function () {
-        spin(fn () => sleep(2), 'Uninstall dependencies...');
-    })
+    }, revert: function ($responses) {
+        if($responses['install']){
+            spin(fn () => sleep(2), 'Uninstall dependencies...');
+        }
+    }, key: 'install')
+    ->add(fn () => confirm("Finish installation?"))
     ->add(fn ($responses) => note(<<<EOT
     Installation complete!
 
