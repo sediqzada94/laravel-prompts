@@ -14,8 +14,8 @@ class StepBuilder {
             if($revert === null){
                 $revert = fn () => null;
             }
-
-            $this->steps[] = [$step, $revert, $key];
+            $previousStep = $this->steps[count($this->steps)-1] ??  null;
+            $this->steps[] = new Step($step, $revert, $key, $previousStep);
 
             return $this;
           
@@ -26,35 +26,32 @@ class StepBuilder {
 
             $index = 0;
 
-            $steps = [];
-            $previousRevert = false;
+            // $steps = $this->normalizeSteps();
 
-            foreach($this->steps as [$step, $revert, $key]){
-                $steps[] = [$step, $previousRevert, $key];
-                $previousRevert = $revert;
-            }
-
-            while($index < count($steps)){
+            while($index < count($this->steps)){
                  
-                [$step, $revert, $key] = $steps[$index];
+                $step = $this->steps[$index];
 
                 $wasReverted = false;
 
-                Prompt::$revertedUsing = $revert ? function () use (&$wasReverted) {
+                Prompt::$revertedUsing = $step->revert ? function () use (&$wasReverted) {
                       $wasReverted = true;
                 } : null;
 
-                $this->responses[$key ?? $index] = $step($this->responses);
-                 
-                if($wasReverted){
-                    $revert($this->responses);
-                    $index--;
+                $this->responses[$step->key ?? $index] = $step->run($this->responses);
+
+                if(!$wasReverted){
+                   $index++;
+                   continue;
+
                 }
-                else {
-                    $index++;
-                }
+
+                 $step->revert($this->responses);
+                 $index--;
               
             }
+            
+            Prompt::$revertedUsing = null;
             
             return $this->responses;
         }
